@@ -47,12 +47,11 @@ class HTTPClient(object):
     def get_code(self, data):
         status_line = data.split("\r\n")[0]
         response_code = status_line.split(' ')[1]
-        print(status_line)
         return int(response_code)
 
     def get_headers(self, data):
-        headers = data.split("\r\n\r\n")[0]
-        return headers
+        # headers = data.split("\r\n\r\n")[0]
+        return None
 
     def get_body(self, data):
         body = data.split("\r\n\r\n")[1]
@@ -103,7 +102,6 @@ class HTTPClient(object):
             "GET {} HTTP/1.1\r\nHost: {}\r\nAccept: /*/\r\nConnection: close\r\n\r\n".format(path, host_name))
 
         socket_data = self.recvall(self.socket)
-        # print(socket_data)
 
         code = self.get_code(socket_data)
         body = self.get_body(socket_data)
@@ -123,21 +121,20 @@ class HTTPClient(object):
         # Connecting socket
         self.connect(host_name, port)
 
-        # print("Args= " + args)
         if args == None:
             args = ''
         else:
-            urlencode(args)
+            args = urlencode(args)
 
-        response = "POST {} HTTP/1.1\r\nHost: {}\r\nContent-Type: application/x-www-form-urlencoded\r\nAccept: /*/\r\nContent Lenght: {}\r\nConnection: close\r\n\r\n".format(
-            path, host_name, len(args)) + args
+        response = "POST {} HTTP/1.1\r\nHost: {}\r\nContent-Type: application/x-www-form-urlencoded\r\nAccept: /*/\r\nContent-Length: {}\r\nConnection: close\r\n\r\n".format(
+            path, host_name, len(args)) + str(args)
         self.sendall(response)
 
         socket_data = self.recvall(self.socket)
-        # print(socket_data)
 
         code = self.get_code(socket_data)
         body = self.get_body(socket_data)
+
         # print(body)
 
         self.close()
