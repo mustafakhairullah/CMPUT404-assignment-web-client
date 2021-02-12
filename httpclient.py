@@ -96,9 +96,16 @@ class HTTPClient(object):
         # Connecting socket
         self.connect(host_name, port)
 
+        # Encoding the arguments
+        if args == None:
+            args = ''
+        else:
+            args = str(urlencode(args))
+
         # Sending the request headers
         self.sendall(
-            "GET {} HTTP/1.1\r\nHost: {}\r\nAccept: /*/\r\nConnection: close\r\n\r\n".format(path, host_name))
+            "GET {} HTTP/1.1\r\nHost: {}\r\nContent-Type: application/x-www-form-urlencoded\r\nAccept: /*/\r\nContent-Length: {}\r\nConnection: close\r\n\r\n".format(
+                path, host_name, len(args)) + args)
 
         # Getting the data from the socket connected
         socket_data = self.recvall(self.socket)
