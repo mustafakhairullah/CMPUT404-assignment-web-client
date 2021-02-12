@@ -50,8 +50,8 @@ class HTTPClient(object):
         return int(response_code)
 
     def get_headers(self, data):
-        # headers = data.split("\r\n\r\n")[0]
-        return None
+        headers = data.split("\r\n\r\n")[0]
+        return headers
 
     def get_body(self, data):
         body = data.split("\r\n\r\n")[1]
@@ -84,8 +84,6 @@ class HTTPClient(object):
         if path == "":
             path = "/"
 
-        # print("path = {}, host = {}, port = {}".format(path, hostname, port))
-
         return path, hostname, port
 
     def GET(self, url, args=None):
@@ -98,15 +96,21 @@ class HTTPClient(object):
         # Connecting socket
         self.connect(host_name, port)
 
+        # Sending the request headers
         self.sendall(
             "GET {} HTTP/1.1\r\nHost: {}\r\nAccept: /*/\r\nConnection: close\r\n\r\n".format(path, host_name))
 
+        # Getting the data from the socket connected
         socket_data = self.recvall(self.socket)
 
+        # Getting the response code and body from the data recieved
         code = self.get_code(socket_data)
         body = self.get_body(socket_data)
-        # print(body)
 
+        # Printing the response to stdout
+        print(body)
+
+        # Closing the connectinion
         self.close()
 
         return HTTPResponse(code, body)
@@ -121,22 +125,28 @@ class HTTPClient(object):
         # Connecting socket
         self.connect(host_name, port)
 
+        # Encoding the arguments
         if args == None:
             args = ''
         else:
             args = urlencode(args)
 
+        # Sending the response headers
         response = "POST {} HTTP/1.1\r\nHost: {}\r\nContent-Type: application/x-www-form-urlencoded\r\nAccept: /*/\r\nContent-Length: {}\r\nConnection: close\r\n\r\n".format(
             path, host_name, len(args)) + str(args)
         self.sendall(response)
 
+        # Getting the data from the socket connected
         socket_data = self.recvall(self.socket)
 
+        # Getting the response code and body from the data recieved
         code = self.get_code(socket_data)
         body = self.get_body(socket_data)
 
-        # print(body)
+        # Printing the response to stdout
+        print(body)
 
+        # Closing the connectinion
         self.close()
 
         return HTTPResponse(code, body)
